@@ -1,0 +1,4 @@
+*.pyc
+*.npy
+*.wav
+*.json
