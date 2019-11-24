@@ -2,3 +2,5 @@
 *.npy
 *.wav
 *.json
+*.pth.tar
+

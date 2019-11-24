@@ -80,7 +80,7 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=32):  #CHANGE
+    def __init__(self, block, layers, num_classes=600):  #CHANGE
         self.inplanes = 64
         super(ResNet, self).__init__()
 
@@ -96,7 +96,7 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
 
-        self.avgpool = nn.Sequential(nn.AvgPool2d(6,4)) #CHANGE
+        self.avgpool = nn.Sequential(nn.AvgPool2d(4,6)) #CHANGE
 
         self.group2 = nn.Sequential(
             OrderedDict([
@@ -136,7 +136,6 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.group2(x)

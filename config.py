@@ -1,13 +1,14 @@
 params = dict()
 params['model_name'] = 'Neural Network'
 params['dataset'] = 'Kinetics32'
+params['num_classes'] = 600
 # learning params
 params['learning_rate'] = 1e-2
-params['step'] = 500     # lr decay step
-params['milestones'] = [8, 28, 58]
+params['step'] = 3     # lr decay step
+params['milestones'] = [3, 6, 9]
 params['momentum'] = 0.9
 params['weight_decay'] = 1e-5
-params['resume_epoch'] = 0
+params['resume_epoch'] = 7
 params['dropout'] = 0.8     #越大失活的越多
 params['pretrained'] = False
 params['pretrained_file_RGB'] = '/media/zjw/ZHAOJINGWEI/pretrain_file_conversion/p3d_pretrained_from_caffe_adapted_to_k-600.pth.tar'
@@ -15,9 +16,9 @@ params['pretrained_filr_nominal'] = 'C:/Users/ZIRC2/Desktop/Zhao Jingwei/LGD-Kin
 
 # dataset params
 params['lmdb_root'] = '/home/sx/data2/zjw/'
-params['epoch_num'] = 100
+params['epoch_num'] = 10
 params['batch_size'] = 32    # single GPU
-params['num_workers'] = 4
+params['num_workers'] = 8
 
 params['sample_rate'] = 1
 # test model

@@ -50,7 +50,7 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 
-def train(model, train_dataloader, epoch, criterion, optimizer, writer):
+def train(model, train_dataloader, epoch, criterion, optimizer, writer, acclist):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -93,13 +93,14 @@ def train(model, train_dataloader, epoch, criterion, optimizer, writer):
                 top1_acc=top1.avg,
                 top5_acc=top5.avg)
             print(print_string)
+    acclist.append('Top-1: ' + str(top1.avg) + '; Top-5: ' + str(top5.avg) + '\n')
     #writer.add_scalar('train/loss_epoch', losses.avg, epoch)
     #writer.add_scalar('train/top1_acc_epoch', top1.avg, epoch)
     #writer.add_scalar('train/top5_acc_epoch', top5.avg, epoch)
 
 
 
-def validation(model, val_dataloader, epoch, criterion, writer, totallist):
+def validation(model, val_dataloader, epoch, criterion, writer, acclist):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -109,7 +110,7 @@ def validation(model, val_dataloader, epoch, criterion, writer, totallist):
 
     end = time.time()
     with torch.no_grad():
-        total_outputs=torch.empty(0,32)
+        total_outputs=torch.empty(0,params['num_classes'])
         for step, (inputs, labels) in enumerate(val_dataloader):
             data_time.update(time.time() - end)
             inputs = inputs.cuda().float()
@@ -140,10 +141,10 @@ def validation(model, val_dataloader, epoch, criterion, writer, totallist):
                 print(print_string)
             if (epoch+1) % 1 == 0:
                 total_outputs = torch.cat((total_outputs, outputs.detach().cpu()), dim=0)
-    if (epoch+1) % 1 == 0:
+    #if (epoch+1) % 5 == 1:#?????????????????????????????????????????????????????????????????????????????????????????????????????????
         #print(total_outputs.shape)
-        np.save('vgg_output_Kinetics32.npy', total_outputs)
-    totallist.append(top1.avg)
+    np.save('resNet_output_Kinetics600.npy', total_outputs)
+    acclist.append('Top-1: ' + str(top1.avg) + '; Top-5: ' + str(top5.avg) + '\n')
         #np.save('new_output_labels_Kinetics32.npy', F.softmax(outputs.detach()).cpu())
     #writer.add_scalar('val/loss_epoch', losses.avg, epoch)
     #writer.add_scalar('val/top1_acc_epoch', top1.avg, epoch)
@@ -164,7 +165,7 @@ def main():
     """
     writer = None#SummaryWriter(logdir)
 
-    #gpu_num = torch.cuda.device_count()
+    gpu_num = torch.cuda.device_count()
 
     print("Loading " + " dataset")
     x_train = np.load('datalists\\train_audio_list.npy')
@@ -181,20 +182,20 @@ def main():
     """
 
     train_dataloader = DataLoader(audioDataLoader('train', x_train, y_train),
-                                  batch_size=params['batch_size'],
+                                  batch_size=params['batch_size'] * gpu_num,
                                   shuffle=True,
                                   num_workers=params['num_workers'],
                                   drop_last=False)
     val_dataloader = DataLoader(audioDataLoader('val', x_val, y_val),
-                                batch_size=params['batch_size'],
+                                batch_size=params['batch_size'] * gpu_num,
                                 num_workers=params['num_workers'],
                                 drop_last=False)
 
     print("load model")
     #model = logistic.Logistic()
     #model = neural_network.NeuralNetwork()
-    #model = resnet.resnet50()
-    model = vgg.vgg16()
+    model = resnet.resnet50()
+    #model = vgg.vgg16()
     #model.apply(weight_init)
 
     optimizer = optim.SGD(model.parameters(), lr=params['learning_rate'], momentum=0.9)#, weight_decay=5e-4)
@@ -222,7 +223,7 @@ def main():
         summary(model, (3,params['clip_len'],params['crop_size'], params['crop_size']))
         return
 
-    #model = nn.DataParallel(model, device_ids=list(range(gpu_num)))  # multi-Gpu
+    model = nn.DataParallel(model, device_ids=list(range(gpu_num)))  # multi-Gpu
 
     if params['resume_epoch'] == 0:
         print("Training {} from scratch...".format(params['model_name']))
@@ -237,18 +238,23 @@ def main():
         # model.load_state_dict(checkpoint)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-
+        last_epoch = checkpoint['epoch']
 
     criterion = nn.CrossEntropyLoss().cuda()  # standard crossentropy loss for classification
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=params['step'], gamma=0.1)  # the scheduler divides the lr by 10 every 10 epochs
-    totallist=[]
+    #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=params['step'], gamma=0.1)  # the scheduler divides the lr by 10 every 10 epochs
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=params['milestones'], gamma=0.1, last_epoch=last_epoch)
+    train_record = []
+    val_record = []
     for epoch in range(params['resume_epoch'],params['epoch_num']):
-        train(model, train_dataloader, epoch, criterion, optimizer, writer)
+        train(model, train_dataloader, epoch, criterion, optimizer, writer, train_record)
+        with open('train_record.txt', 'w') as f:
+            f.writelines(train_record)
         if (epoch+1) % 1 == 0:
-            validation(model, val_dataloader, epoch, criterion, writer, totallist)
+            validation(model, val_dataloader, epoch, criterion, writer, val_record)
+        with open('val_record.txt', 'w') as f:
+            f.writelines(val_record)
         scheduler.step()
-        print(totallist)
-        if (epoch+1) % params['epoch_num'] == 0:
+        if (epoch+1) % 1 == 0:
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
             checkpoint = os.path.join(save_dir, saveName + '_epoch-' + str(epoch) + '.pth.tar')
