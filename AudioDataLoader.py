@@ -14,7 +14,7 @@ def default_loader(path):
     return torch.from_numpy(x)
 
 class audioDataLoader(Dataset):
-    def __init__(self, phase, X, Y, loader=default_loader):
+    def __init__(self, phase, X, Y, loader=default_loader): #X, Y are npy file which contain file directories of train\val samples and corresponding labels
         #定义好 image 的路径
         self.images = X
         self.target = Y

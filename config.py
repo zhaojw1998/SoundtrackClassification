@@ -1,6 +1,6 @@
 params = dict()
-params['model_name'] = 'Neural Network'
-params['dataset'] = 'Kinetics32'
+params['model_name'] = 'Resnet-50'
+params['dataset'] = 'Kinetics600'
 params['num_classes'] = 600
 # learning params
 params['learning_rate'] = 1e-2

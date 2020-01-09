@@ -1,3 +1,4 @@
+#This script extracts melspectrograms from audio files. Each ,elspectrogram is a 64X96 matrix, which corresponds to a 960ms-long audio clip.
 import glob
 import os
 import queue
@@ -47,25 +48,3 @@ if __name__ == '__main__':
 
     melspectrogram_extract(phase='train', root_dir=root, sample_size=0.96, windowsize=0.025, stepsize=0.01, filefomat='.wav', save=save_path, num_jobs=8)
     melspectrogram_extract(phase='val', root_dir=root, sample_size=0.96, windowsize=0.025, stepsize=0.01, filefomat='.wav', save=save_path, num_jobs=8)
-
-"""
-file_name = 'C:\\Users\\lenovo\\Desktop\\Kinetics_2\\extract\\train\\baby_waking_up\\=-EQ3sI7NWx4_000003_000013.wav' 
-#X, sample_rate = sf.read(file_name, dtype='float32')
-file_name2 = 'D:\\ZhaoJingwei\\助飞\\05MOOC课程\\01 ChinaX(1)_哈佛大学\\Introduction to ChinaX.wav'
-#Y, sample_rate = sf.read(file_name2, dtype='float32')
-#print(X.shape)
-#print(Y.shape)
-clip, sample_rate = librosa.load(file_name, sr=None)
-
-print(clip.shape)
-print(sample_rate)
-stft = librosa.stft(clip, n_fft=1024, hop_length=512)
-print(stft.shape)
-
-clip = clip[0:int(0.96*sample_rate)]
-mel_spec = librosa.feature.melspectrogram(clip, n_fft=int(0.01*sample_rate), hop_length=int(0.01*sample_rate), n_mels=64, sr=sample_rate, power=1.0)# fmin=fmin, fmax=fmax)
-mel_spec_db = librosa.amplitude_to_db(mel_spec, ref=np.max)
-print(mel_spec_db.shape)
-
-root = 'D:\\Download\\Program\\ESC-50-master\\ESC-50-master\\audio'
-"""
