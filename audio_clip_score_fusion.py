@@ -1,9 +1,9 @@
 # This script fuses the scores derived from melspetrograms extracted from the same audio file, in order to enhance validation accuracy.
 import numpy as np 
 import os
-outputs=np.load('npy_files\\resNet_output_Kinetics600_1014.npy')
+outputs=np.load('npy_files/resNet_output_Kinetics600_1014.npy')
 k600_labels={}
-k600_label_file = open('file_lists\\kinetics_600_label_list.txt', 'r')
+k600_label_file = open('file_lists/kinetics_600_label_list.txt', 'r')
 for line in k600_label_file.readlines():
     k600_labels[line.strip('\n').split('\t')[-1]] = int(line.strip('\n').split('\t')[0])
 

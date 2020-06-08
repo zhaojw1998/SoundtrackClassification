@@ -14,8 +14,13 @@ A high-level presentation of our work is shown in the figure below:
 <img src=".vscode\\fusion.jpg" width = "65%" />
 
 ## 2. Code and File Arrangement
+### 2.1 Files you can directly run:
+    /scripts/audio_clip_score_preview.py: you can run this to view the top-1 accuracy of soundtrack classification;
+    /match_video_to_audio_quantity.py: match the shape of video inference to that of the audio. A demo video inference result is reday in /video_classification_results.
+    /Fusion_audio_with_video.py: Fuse video inference and audio inference to get the united classification results.
+    For other code, you need to change the file directories to your own and derive corresponding .txt or .npy files for further use. Here we illustrates all the codes as follow.
 
-In this work, the codes and files are arranged as follow:
+### 2.2 In this work, the codes and files are arranged as follow:
 
     |--root folder
 
@@ -75,7 +80,7 @@ In this work, the codes and files are arranged as follow:
                         |--val
                             …… (similar as that in the train folder)
 
-            |--audio_clip_score_test.py
+            |--audio_clip_score_preview.py
                 Output of the network are melspectrogram-wise, i.e., each output score corresponds to a 960ms clip, but not the whole sound track file. This script averages the scores from corresponding melspectrograms to have a brief glance at the sound-track-wise output scores.
 
         |--AudioDataLoader.py
@@ -98,7 +103,7 @@ In this work, the codes and files are arranged as follow:
             Output of the network are melspectrogram-wise, i.e., each output score corresponds to a 960ms clip, but not the whole sound track file. This script averages the scores from corresponding melspectrograms, and form a new output which is sound-track-wise.
 
         |--Fusion_audio_with_video.py
-            This script fuses video and audio outputs. Note that both outputs should have the same length. Specifically, both outputs in our processing are 600*29731*1 npy files.
+            This script fuses video and audio outputs as a weighted average. Note that both outputs should have the same length. Specifically, both outputs in our processing are 600*29731*1 npy files. This script now supports automatically choosing the best weighted ratio.
 
 ## 3. Run
 
@@ -120,3 +125,5 @@ If you have any problem in dealing with the codes above, please feel free to con
 Zhao Jingwei: zhaojw@sjtu.edu.cn
 
 2019.12.04
+
+2020.06.08 (modified)
